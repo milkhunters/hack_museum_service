@@ -1,16 +1,11 @@
-import asyncio
 import logging
 import os
 from typing import Callable
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
-from grpc import aio
 
 from exhibit.config import Config
-from exhibit.protos.blog_service_control import blog_service_control_pb2_grpc
-from exhibit.services.blog_service_control import BlogService
-
 from exhibit.db import create_psql_async_session
 from exhibit.services.auth.scheduler import update_reauth_list
 from exhibit.utils.s3 import S3Storage
@@ -26,16 +21,6 @@ async def init_db(app: FastAPI, config: Config):
         echo=config.DEBUG,
     )
     app.state.db_session = session
-
-
-async def grpc_server(app_state):
-    server = aio.server()
-    blog_service_control_pb2_grpc.add_BlogServicer_to_server(BlogService(app_state), server)
-    listen_addr = '[::]:50052'
-    server.add_insecure_port(listen_addr)
-    logging.info(f"Starting gRPC server on {listen_addr}")
-    await server.start()
-    await server.wait_for_termination()
 
 
 async def init_reauth_checker(app: FastAPI, config: Config):
@@ -73,7 +58,6 @@ def create_start_app_handler(app: FastAPI, config: Config) -> Callable:
         app.state.reauth_session_dict = dict()
         await init_reauth_checker(app, config)
 
-        asyncio.get_running_loop().create_task(grpc_server(app.state))
         logging.info("FastAPI Успешно запущен.")
 
     return start_app

@@ -69,7 +69,7 @@ class ExhibitApplicationService:
                 (
                         state != ExhibitState.PUBLISHED,
                         owner_id != self._current_user.id,
-                        Permission.GET_PRIVATE_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_PRIVATE_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете получить список приватных экспонатов")
@@ -78,7 +78,7 @@ class ExhibitApplicationService:
                 (
                         state != ExhibitState.PUBLISHED,
                         owner_id == self._current_user.id,
-                        Permission.GET_SELF_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_SELF_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете получить свой список приватных экспонатов")
@@ -86,7 +86,7 @@ class ExhibitApplicationService:
         if all(
                 (
                         state == ExhibitState.PUBLISHED,
-                        Permission.GET_PUBLIC_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_PUBLIC_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете получить список опубликованных экспонатов")
@@ -127,7 +127,7 @@ class ExhibitApplicationService:
                 (
                         exhibit.state != ExhibitState.PUBLISHED,
                         exhibit.owner_id != self._current_user.id,
-                        Permission.GET_PRIVATE_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_PRIVATE_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Материал не опубликован")
@@ -136,7 +136,7 @@ class ExhibitApplicationService:
                 (
                         exhibit.state != ExhibitState.PUBLISHED,
                         exhibit.owner_id == self._current_user.id,
-                        Permission.GET_SELF_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_SELF_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете просматривать свои приватные публикации")
@@ -144,7 +144,7 @@ class ExhibitApplicationService:
         if all(
                 (
                         exhibit.state == ExhibitState.PUBLISHED,
-                        Permission.GET_PUBLIC_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_PUBLIC_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете просматривать публичные публикации")
@@ -160,7 +160,7 @@ class ExhibitApplicationService:
 
         return schemas.Exhibit.model_validate(exhibit)
 
-    @permission_filter(Permission.CREATE_SELF_ARTICLES)
+    @permission_filter(Permission.CREATE_SELF_EXHIBITS)
     @state_filter(UserState.ACTIVE)
     async def create_exhibit(self, data: schemas.ExhibitCreate) -> schemas.Exhibit:
         _ = await self._repo.create(
@@ -186,13 +186,13 @@ class ExhibitApplicationService:
 
         if (
                 exhibit.owner_id != self._current_user.id and
-                Permission.UPDATE_USER_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_USER_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не являетесь владельцем экспоната")
 
         if (
                 exhibit.owner_id == self._current_user.id and
-                Permission.UPDATE_SELF_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_SELF_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не можете редактировать свои экспоната")
 
@@ -207,7 +207,7 @@ class ExhibitApplicationService:
 
         await self._repo.update(exhibit_id, **data.model_dump(exclude_unset=True, exclude={"tags"}))
 
-    @permission_filter(Permission.RATE_ARTICLES)
+    @permission_filter(Permission.RATE_EXHIBITS)
     @state_filter(UserState.ACTIVE)
     async def rate_exhibit(self, exhibit_id: uuid.UUID, state: RateState) -> None:
         exhibit = await self._repo.get(id=exhibit_id)
@@ -235,13 +235,13 @@ class ExhibitApplicationService:
 
         if (
                 exhibit.owner_id != self._current_user.id and
-                Permission.DELETE_USER_ARTICLES.value not in self._current_user.permissions
+                Permission.DELETE_USER_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не являетесь владельцем экспоната")
 
         if (
                 exhibit.owner_id == self._current_user.id and
-                Permission.DELETE_SELF_ARTICLES.value not in self._current_user.permissions
+                Permission.DELETE_SELF_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не можете удалять свои экспоната")
 
@@ -257,7 +257,7 @@ class ExhibitApplicationService:
                 (
                         exhibit.state != ExhibitState.PUBLISHED,
                         exhibit.owner_id != self._current_user.id,
-                        Permission.GET_PRIVATE_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_PRIVATE_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете просматривать файлы неопубликованных экспонатов")
@@ -266,7 +266,7 @@ class ExhibitApplicationService:
                 (
                         exhibit.state != ExhibitState.PUBLISHED,
                         exhibit.owner_id == self._current_user.id,
-                        Permission.GET_SELF_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_SELF_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете просматривать файлы своих приватных публикаций")
@@ -274,7 +274,7 @@ class ExhibitApplicationService:
         if all(
                 (
                         exhibit.state == ExhibitState.PUBLISHED,
-                        Permission.GET_PUBLIC_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_PUBLIC_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете просматривать файлы публичных публикаций")
@@ -312,7 +312,7 @@ class ExhibitApplicationService:
                 (
                         exhibit.state != ExhibitState.PUBLISHED,
                         exhibit.owner_id != self._current_user.id,
-                        Permission.GET_PRIVATE_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_PRIVATE_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете просматривать файлы неопубликованных экспонатов")
@@ -321,7 +321,7 @@ class ExhibitApplicationService:
                 (
                         exhibit.state != ExhibitState.PUBLISHED,
                         exhibit.owner_id == self._current_user.id,
-                        Permission.GET_SELF_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_SELF_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете просматривать файлы своих приватных публикаций")
@@ -329,7 +329,7 @@ class ExhibitApplicationService:
         if all(
                 (
                         exhibit.state == ExhibitState.PUBLISHED,
-                        Permission.GET_PUBLIC_ARTICLES.value not in self._current_user.permissions
+                        Permission.GET_PUBLIC_EXHIBITS.value not in self._current_user.permissions
                 )
         ):
             raise exceptions.AccessDenied("Вы не можете просматривать файлы публичных публикаций")
@@ -369,13 +369,13 @@ class ExhibitApplicationService:
 
         if (
                 exhibit.owner_id != self._current_user.id and
-                Permission.UPDATE_USER_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_USER_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не являетесь владельцем экспоната")
 
         if (
                 exhibit.owner_id == self._current_user.id and
-                Permission.UPDATE_SELF_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_SELF_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не можете редактировать свои экспонаты")
 
@@ -415,13 +415,13 @@ class ExhibitApplicationService:
 
         if (
                 exhibit.owner_id != self._current_user.id and
-                Permission.UPDATE_USER_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_USER_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не являетесь владельцем экспоната")
 
         if (
                 exhibit.owner_id == self._current_user.id and
-                Permission.UPDATE_SELF_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_SELF_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не можете подтверждать загрузку файлов")
 
@@ -452,13 +452,13 @@ class ExhibitApplicationService:
 
         if (
                 exhibit.owner_id != self._current_user.id and
-                Permission.UPDATE_USER_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_USER_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не являетесь владельцем экспоната")
 
         if (
                 exhibit.owner_id == self._current_user.id and
-                Permission.UPDATE_SELF_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_SELF_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не можете удалять файлы")
 
@@ -489,13 +489,13 @@ class ExhibitApplicationService:
 
         if (
                 exhibit.owner_id != self._current_user.id and
-                Permission.UPDATE_USER_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_USER_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не являетесь владельцем экспоната")
 
         if (
                 exhibit.owner_id == self._current_user.id and
-                Permission.UPDATE_SELF_ARTICLES.value not in self._current_user.permissions
+                Permission.UPDATE_SELF_EXHIBITS.value not in self._current_user.permissions
         ):
             raise exceptions.AccessDenied("Вы не можете установить постер для своих экспонатов")
 

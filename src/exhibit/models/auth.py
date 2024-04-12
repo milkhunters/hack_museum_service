@@ -105,7 +105,7 @@ class UnauthenticatedUser(BaseUser):
     @property
     def permissions(self) -> set[str]:
         return {
-            Permission.GET_PUBLIC_ARTICLES.value,
+            Permission.GET_PUBLIC_EXHIBITS.value,
             Permission.GET_PUBLIC_COMMENTS.value,
         }
 

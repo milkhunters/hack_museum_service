@@ -9,6 +9,6 @@ WORKDIR /code
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
-ENV PYTHONPATH=/app/code/src
+ENV PYTHONPATH=/code/src
 
 CMD ["uvicorn", "src.exhibit.app:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000", "--no-server-header"]

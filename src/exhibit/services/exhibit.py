@@ -440,6 +440,7 @@ class ExhibitApplicationService:
             raise exceptions.NotFound("Файл не загружен")
 
         await self._file_repo.update(id=file_id, is_uploaded=True)
+        await self._repo.update(exhibit_id, poster=file_id)
 
     @state_filter(UserState.ACTIVE)
     async def delete_exhibit_file(self, exhibit_id: uuid.UUID, file_id: uuid.UUID) -> None:

@@ -38,10 +38,10 @@ class BaseUser(ABC, authentication.BaseUser):
 
 
 class AuthenticatedUser(BaseUser):
-    def __init__(self, id: str, permissions: list[Permission], state_id: int, exp: int, **kwargs):
+    def __init__(self, id: str, permissions: list[Permission], state: str, exp: int, **kwargs):
         self._id = uuid.UUID(id)
         self._permissions = permissions
-        self._state_id = state_id
+        self._state = state
         self._exp = exp
 
     @property
@@ -66,7 +66,7 @@ class AuthenticatedUser(BaseUser):
 
     @property
     def state(self) -> UserState:
-        return UserState(self._state_id)
+        return UserState(self._state)
 
     @property
     def access_exp(self) -> int:

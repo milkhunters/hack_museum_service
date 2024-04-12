@@ -115,7 +115,7 @@ class ExhibitUpdate(BaseModel):
 class ExhibitFile(BaseModel):
     id: uuid.UUID
     filename: str
-    article_id: uuid.UUID
+    exhibit_id: uuid.UUID
     content_type: str
     is_uploaded: bool
 

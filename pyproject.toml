@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "milky-blog-service"
+name = "hack-museum-service"
 version = "0.1.0"
 description = ""
 authors = ["JKearnsl <boyarshinovn@gmail.com>"]
@@ -17,7 +17,7 @@ aiohttp = "^3.9.4"
 aiobotocore = "^2.7.0"
 
 python-consul = "^1.1.0"
-pyjwt = "^2.8.0"
+python-jose = { version = "==3.3.*", extras = ["cryptography"] }
 grpcio = "^1.59.0"
 APScheduler = "^3.10.4"
 psycopg2-binary = "^2.9.7"

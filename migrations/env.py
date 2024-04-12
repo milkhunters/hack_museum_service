@@ -1,4 +1,3 @@
-import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -6,12 +5,12 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from exhibit.config import load_consul_config
+from exhibit.config import load_config
 from exhibit.models.tables import Base
 
 
 # App Config
-app_config = load_consul_config(os.getenv('CONSUL_ROOT'), host="192.168.3.41")
+app_config = load_config()
 
 
 # this is the Alembic Config object, which provides

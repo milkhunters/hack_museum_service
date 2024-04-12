@@ -6,8 +6,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.config import load_consul_config
-from src.models.tables import Base
+from exhibit.config import load_consul_config
+from exhibit.models.tables import Base
 
 
 # App Config

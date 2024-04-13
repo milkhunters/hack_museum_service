@@ -18,4 +18,6 @@ async def get_services(
         current_user=local_scope.get("user"),
         config=global_scope.config,
         file_storage=global_scope.file_storage,
+        isa=global_scope.isa,
+        task_result=global_scope.task_result
     )

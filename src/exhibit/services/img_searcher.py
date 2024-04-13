@@ -80,10 +80,10 @@ class ImgSearcherApplicationService:
 
     async def get_task_result(
             self,
-            task_id: uuid.UUID
+            file_id: uuid.UUID
     ) -> list[ExhibitSmall]:
 
-        data = self._task_result.get(str(task_id))
+        data = self._task_result.get(str(file_id))
         if data is None:
             raise exceptions.NotFound("Задачи не существует")
 

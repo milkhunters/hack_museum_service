@@ -24,9 +24,6 @@ async def make_upload_url_file(
     """
     Загрузить файл для поиска
 
-    Требуемое состояние: ACTIVE
-
-    Требуемые права доступа: GET_EXHIBITS
 
     """
     return FileUploadResponse(content=await services.img_searcher.make_upload_url_file(data))
@@ -40,21 +37,18 @@ async def make_search_task(
     """
     Создать таску на поиск по изображению
 
-    Требуемое состояние: ACTIVE
-
-    Требуемые права доступа: GET_EXHIBITS
 
     """
     return await services.img_searcher.make_search_task(file_id)
 
 
-@router.get("/task/{task_id}", response_model=ExhibitsResponse, status_code=http_status.HTTP_201_CREATED)
+@router.get("/task/{file_id}", response_model=ExhibitsResponse, status_code=http_status.HTTP_201_CREATED)
 async def get_task_result(
-        task_id: uuid.UUID,
+        file_id: uuid.UUID,
         services: ServiceFactory = Depends(get_services)
 ):
     """
     Получить результат поиска по изображению
 
     """
-    return ExhibitsResponse(content=await services.img_searcher.get_task_result(task_id))
+    return ExhibitsResponse(content=await services.img_searcher.get_task_result(file_id))

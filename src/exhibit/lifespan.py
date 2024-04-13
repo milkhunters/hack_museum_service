@@ -56,12 +56,7 @@ async def init_img_search_adapter(app: FastAPI, config: ImgSearcherConfig):
         rmq,
         config
     )
-    await getattr(app, "state").isa.send_data(
-        body=json.dumps({
-            "file_id": "7d481a72-4784-4e98-b29d-a6874dd20ca7",
-            "exhibit_id": "8b58cfd8-bb11-4704-b5dc-9f02b7c2ed47",
-            "command": "add"
-        }))
+
 
     channel = await rmq.channel()
     queue = await channel.declare_queue(

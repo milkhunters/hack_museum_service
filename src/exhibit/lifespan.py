@@ -1,13 +1,16 @@
+import asyncio
 import logging
 import os
 from typing import Callable
 
+import aio_pika
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 
-from exhibit.config import Config
+from exhibit.config import Config, ImgSearcherConfig
 from exhibit.db import create_psql_async_session
 from exhibit.services.auth.scheduler import update_reauth_list
+from exhibit.services.img_searcher import ImgSearchAdapter, update_task_result
 from exhibit.utils.s3 import S3Storage
 
 
@@ -37,6 +40,38 @@ async def init_reauth_checker(app: FastAPI, config: Config):
     scheduler.start()
 
 
+async def init_img_search_adapter(app: FastAPI, config: ImgSearcherConfig):
+    rmq = await aio_pika.connect_robust(
+        host=config.RABBITMQ.HOST,
+        port=config.RABBITMQ.PORT,
+        login=config.RABBITMQ.USERNAME,
+        password=config.RABBITMQ.PASSWORD,
+        virtualhost=config.RABBITMQ.VHOST,
+    )
+
+    getattr(app, "state").task_result = dict()
+
+    getattr(app, "state").isa = ImgSearchAdapter(
+        rmq,
+        config
+    )
+
+    channel = await rmq.channel()
+    queue = await channel.declare_queue(
+        config.SEARCHER_TASKS_RECEIVER_ID,
+        durable=True,
+        exclusive=False,
+    )
+
+    await queue.consume(lambda message: update_task_result(message, app))
+    try:
+        # Wait until terminate
+        await asyncio.Future()
+    finally:
+        await rmq.close()
+
+
+
 async def init_s3_storage(app: FastAPI, config: Config):
     app.state.file_storage = await S3Storage(
         bucket=config.DB.S3.BUCKET,
@@ -57,6 +92,10 @@ def create_start_app_handler(app: FastAPI, config: Config) -> Callable:
 
         app.state.reauth_session_dict = dict()
         await init_reauth_checker(app, config)
+
+        asyncio.get_running_loop().create_task(
+            init_img_search_adapter(app, config.IMG_SEARCHER)
+        )
 
         logging.info("FastAPI Успешно запущен.")
 

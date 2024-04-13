@@ -3,6 +3,7 @@ from . import auth
 from . import repository
 from .exhibit import ExhibitApplicationService
 from .comment import CommentApplicationService
+from .img_searcher import ImgSearcherApplicationService, ImgSearchAdapter
 from .notification import NotificationApplicationService
 from .permission import PermissionApplicationService
 from .stats import StatsApplicationService
@@ -16,11 +17,15 @@ class ServiceFactory:
             current_user: BaseUser,
             config,
             file_storage,
+            isa,
+            task_result
     ):
         self._repo = repo_factory
         self._current_user = current_user
         self._config = config
         self._file_storage = file_storage
+        self._isa = isa
+        self._task_result = task_result
 
     @property
     def exhibit(self) -> ExhibitApplicationService:
@@ -33,6 +38,7 @@ class ServiceFactory:
             like_repo=self._repo.like,
             file_repo=self._repo.file,
             file_storage=self._file_storage,
+            isa=ImgSearchAdapter
         )
 
     @property
@@ -56,3 +62,13 @@ class ServiceFactory:
     @property
     def permission(self) -> PermissionApplicationService:
         return PermissionApplicationService()
+
+    @property
+    def img_searcher(self) -> ImgSearcherApplicationService:
+        return ImgSearcherApplicationService(
+            current_user=self._current_user,
+            exhibit_repo=self._repo.exhibit,
+            file_storage=self._file_storage,
+            isa=self._isa,
+            task_result=self._task_result
+        )

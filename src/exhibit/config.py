@@ -48,6 +48,22 @@ class ContactConfig:
 
 
 @dataclass
+class RabbitMQ:
+    HOST: str
+    PORT: int
+    USERNAME: str
+    PASSWORD: str
+    VHOST: str
+
+
+@dataclass
+class ImgSearcherConfig:
+    SEARCHER_TASKS_SENDER_ID: str
+    SEARCHER_TASKS_RECEIVER_ID: str
+    RABBITMQ: RabbitMQ
+
+
+@dataclass
 class JWTConfig:
     PUBLIC_KEY: str
 
@@ -66,6 +82,7 @@ class Config:
     DEBUG: bool
     JWT: JWTConfig
     BASE: BaseConfig
+    IMG_SEARCHER: ImgSearcherConfig
     DB: DbConfig
 
 
@@ -136,5 +153,16 @@ def load_config() -> Config:
                 BUCKET=config['database']['s3']['bucket'],
                 PUBLIC_ENDPOINT_URL=config['database']['s3']['public_endpoint_url']
             ),
+        ),
+        IMG_SEARCHER=ImgSearcherConfig(
+            SEARCHER_TASKS_SENDER_ID=config['img_searcher']['searcher_tasks_sender_id'],
+            SEARCHER_TASKS_RECEIVER_ID=config['img_searcher']['searcher_tasks_receiver_id'],
+            RABBITMQ=RabbitMQ(
+                HOST=config['img_searcher']['rabbitmq']['host'],
+                PORT=config['img_searcher']['rabbitmq']['port'],
+                USERNAME=config['img_searcher']['rabbitmq']['username'],
+                PASSWORD=config['img_searcher']['rabbitmq']['password'],
+                VHOST=config['img_searcher']['rabbitmq']['vhost']
+            )
         ),
     )

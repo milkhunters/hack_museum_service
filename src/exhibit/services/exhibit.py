@@ -446,8 +446,9 @@ class ExhibitApplicationService:
         await self._repo.update(exhibit_id, poster=file_id)
 
         await self._isa.send_data(
-            json.dumps({
+            body=json.dumps({
                 "file_id": str(file_id),
+                "exhibit_id": str(exhibit_id),
                 "command": "add"
             }))
 
@@ -525,7 +526,8 @@ class ExhibitApplicationService:
         await self._repo.update(id=exhibit_id, poster=file_id)
 
         await self._isa.send_data(
-            json.dumps({
+            body=json.dumps({
                 "file_id": str(file_id),
+                "exhibit_id": str(exhibit_id),
                 "command": "add"
             }))

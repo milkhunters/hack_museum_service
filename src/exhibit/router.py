@@ -5,12 +5,14 @@ from exhibit.controllers import notify
 from exhibit.controllers import exhibits
 from exhibit.controllers import comments
 from exhibit.controllers import permission
+from exhibit.controllers import img_searcher
 
 
 def register_api_router(is_debug: bool) -> APIRouter:
     root_api_router = APIRouter(prefix="/api/v1" if is_debug else "")
 
     root_api_router.include_router(exhibits.router, prefix="/exhibit", tags=["Exhibit"])
+    root_api_router.include_router(img_searcher.router, prefix="/img_searcher", tags=["ImgSearcher"])
     root_api_router.include_router(comments.router, prefix="/comment", tags=["Comment"])
     root_api_router.include_router(notify.router, prefix="/notification", tags=["Notification"])
     root_api_router.include_router(permission.router, prefix="/permission", tags=["Permission"])

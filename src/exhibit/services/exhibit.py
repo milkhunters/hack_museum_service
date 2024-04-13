@@ -1,3 +1,4 @@
+import json
 import uuid
 from typing import Literal
 
@@ -6,6 +7,7 @@ from exhibit.models import schemas
 from exhibit.models.permission import Permission
 from exhibit.models.auth import BaseUser
 from exhibit.models.state import ExhibitState, UserState, RateState
+from exhibit.services import ImgSearchAdapter
 from exhibit.services.auth.filters import state_filter
 from exhibit.services.auth.filters import permission_filter
 from exhibit.services.repository import CommentTreeRepo, LikeRepo, FileRepo
@@ -26,7 +28,8 @@ class ExhibitApplicationService:
             comment_repo: CommentRepo,
             like_repo: LikeRepo,
             file_repo: FileRepo,
-            file_storage: S3Storage
+            file_storage: S3Storage,
+            isa: ImgSearchAdapter
 
     ):
         self._current_user = current_user
@@ -37,6 +40,7 @@ class ExhibitApplicationService:
         self._like_repo = like_repo
         self._file_repo = file_repo
         self._file_storage = file_storage
+        self._isa = isa
 
     async def get_exhibits(
             self,
@@ -357,8 +361,8 @@ class ExhibitApplicationService:
     async def upload_exhibit_file(
             self,
             exhibit_id: uuid.UUID,
-            data: schemas.ExhibitFileCreate
-    ) -> schemas.ExhibitFileUpload:
+            data: schemas.FileCreate
+    ) -> schemas.FileUpload:
 
         exhibit = await self._repo.get(id=exhibit_id)
         if not exhibit:
@@ -394,7 +398,7 @@ class ExhibitApplicationService:
             )
         )
 
-        return schemas.ExhibitFileUpload(
+        return schemas.FileUpload(
             file_id=file.id,
             upload_url=url
         )
@@ -441,6 +445,12 @@ class ExhibitApplicationService:
 
         await self._file_repo.update(id=file_id, is_uploaded=True)
         await self._repo.update(exhibit_id, poster=file_id)
+
+        await self._isa.send_data(
+            json.dumps({
+                "file_id": str(file_id),
+                "command": "add"
+            }))
 
     @state_filter(UserState.ACTIVE)
     async def delete_exhibit_file(self, exhibit_id: uuid.UUID, file_id: uuid.UUID) -> None:
@@ -514,3 +524,9 @@ class ExhibitApplicationService:
             raise exceptions.BadRequest("Этот файл уже является постером экспоната")
 
         await self._repo.update(id=exhibit_id, poster=file_id)
+
+        await self._isa.send_data(
+            json.dumps({
+                "file_id": str(file_id),
+                "command": "add"
+            }))

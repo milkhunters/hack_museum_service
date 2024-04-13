@@ -1,11 +1,12 @@
 import uuid
+from typing import Sequence
 
 from sqlalchemy import select, text, func, or_, and_
 from sqlalchemy.orm import subqueryload
 
 from exhibit.models import tables
 from .base import BaseRepository
-from ...models.tables import Like
+from ...models.tables import Like, Exhibit
 
 
 class ExhibitRepo(BaseRepository[tables.Exhibit]):
@@ -98,6 +99,37 @@ class ExhibitRepo(BaseRepository[tables.Exhibit]):
         result = await self._session.execute(stmt)
         exhibits_with_likes = []
         for row in result:
+            exhibit = row[0]
+            likes_count = row[1]
+            exhibit.likes_count = likes_count if likes_count else 0
+            exhibits_with_likes.append(exhibit)
+
+        return exhibits_with_likes
+
+    async def get_exhibits_by_ids(self, ids: list[uuid.UUID]) -> Sequence[Exhibit]:
+
+        # Лайки
+        subquery = (
+            select(
+                Like.exhibit_id,
+                func.count(Like.id).label('likes_count')
+            )
+            .group_by(Like.exhibit_id)
+            .subquery()
+        )
+
+        stmt = (
+            select(
+                self.table,
+                subquery.c.likes_count
+            )
+            .outerjoin(subquery, self.table.id == subquery.c.exhibit_id)
+            .options(subqueryload(self.table.tags))
+            .where(self.table.id.in_(ids))
+        )
+
+        exhibits_with_likes = []
+        for row in await self._session.execute(stmt):
             exhibit = row[0]
             likes_count = row[1]
             exhibit.likes_count = likes_count if likes_count else 0

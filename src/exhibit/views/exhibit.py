@@ -18,5 +18,5 @@ class ExhibitFileResponse(BaseView):
     content: schemas.ExhibitFileItem
 
 
-class ExhibitFileUploadResponse(BaseView):
-    content: schemas.ExhibitFileUpload
+class FileUploadResponse(BaseView):
+    content: schemas.FileUpload

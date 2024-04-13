@@ -136,11 +136,11 @@ class ExhibitFileItem(BaseModel):
     updated_at: datetime | None
 
 
-class ExhibitFileCreate(BaseModel):
+class FileCreate(BaseModel):
     filename: str
     content_type: FileType
 
 
-class ExhibitFileUpload(BaseModel):
+class FileUpload(BaseModel):
     file_id: uuid.UUID
     upload_url: PreSignedPostUrl

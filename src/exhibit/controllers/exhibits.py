@@ -9,7 +9,7 @@ from exhibit.models import schemas
 from exhibit.models.state import ExhibitState, RateState
 from exhibit.services import ServiceFactory
 from exhibit.views import ExhibitResponse, ExhibitsResponse
-from exhibit.views.exhibit import ExhibitFilesResponse, ExhibitFileUploadResponse, ExhibitFileResponse
+from exhibit.views.exhibit import ExhibitFilesResponse, FileUploadResponse, ExhibitFileResponse
 
 router = APIRouter()
 
@@ -140,12 +140,12 @@ async def get_exhibit_file(
 
 @router.post(
     "/files/{exhibit_id}",
-    response_model=ExhibitFileUploadResponse,
+    response_model=FileUploadResponse,
     status_code=http_status.HTTP_200_OK
 )
 async def upload_exhibit_file(
         exhibit_id: uuid.UUID,
-        data: schemas.ExhibitFileCreate,
+        data: schemas.FileCreate,
         services: ServiceFactory = Depends(get_services)
 ):
     """
@@ -157,7 +157,7 @@ async def upload_exhibit_file(
 
     Причем пользователь с доступом UPDATE_USER_EXHIBITS может редактировать чужие публикации.
     """
-    return ExhibitFileUploadResponse(content=await services.exhibit.upload_exhibit_file(exhibit_id, data))
+    return FileUploadResponse(content=await services.exhibit.upload_exhibit_file(exhibit_id, data))
 
 
 @router.post("/files/{exhibit_id}/{file_id}", response_model=None, status_code=http_status.HTTP_204_NO_CONTENT)

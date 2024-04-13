@@ -13,8 +13,8 @@ from .exhibit import ExhibitUpdate
 from .exhibit import ExhibitTagItem
 from .exhibit import ExhibitFile
 from .exhibit import ExhibitFileItem
-from .exhibit import ExhibitFileCreate
-from .exhibit import ExhibitFileUpload
+from .exhibit import FileCreate
+from .exhibit import FileUpload
 
 from .tag import Tag
 

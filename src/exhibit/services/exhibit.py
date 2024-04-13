@@ -7,7 +7,6 @@ from exhibit.models import schemas
 from exhibit.models.permission import Permission
 from exhibit.models.auth import BaseUser
 from exhibit.models.state import ExhibitState, UserState, RateState
-from exhibit.services import ImgSearchAdapter
 from exhibit.services.auth.filters import state_filter
 from exhibit.services.auth.filters import permission_filter
 from exhibit.services.repository import CommentTreeRepo, LikeRepo, FileRepo
@@ -29,7 +28,7 @@ class ExhibitApplicationService:
             like_repo: LikeRepo,
             file_repo: FileRepo,
             file_storage: S3Storage,
-            isa: ImgSearchAdapter
+            isa
 
     ):
         self._current_user = current_user

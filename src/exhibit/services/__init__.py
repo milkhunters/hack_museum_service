@@ -38,7 +38,7 @@ class ServiceFactory:
             like_repo=self._repo.like,
             file_repo=self._repo.file,
             file_storage=self._file_storage,
-            isa=ImgSearchAdapter
+            isa=self._isa
         )
 
     @property

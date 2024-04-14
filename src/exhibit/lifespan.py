@@ -5,6 +5,8 @@ import os
 from typing import Callable
 
 import aio_pika
+from aio_pika.abc import AbstractRobustConnection
+from aio_pika.pool import Pool
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 
@@ -42,35 +44,44 @@ async def init_reauth_checker(app: FastAPI, config: Config):
 
 
 async def init_img_search_adapter(app: FastAPI, config: ImgSearcherConfig):
-    rmq = await aio_pika.connect_robust(
-        host=config.RABBITMQ.HOST,
-        port=config.RABBITMQ.PORT,
-        login=config.RABBITMQ.USERNAME,
-        password=config.RABBITMQ.PASSWORD,
-        virtualhost=config.RABBITMQ.VHOST,
-    )
+    async def get_connection() -> AbstractRobustConnection:
+        return await aio_pika.connect_robust(
+            host=config.RABBITMQ.HOST,
+            port=config.RABBITMQ.PORT,
+            login=config.RABBITMQ.USERNAME,
+            password=config.RABBITMQ.PASSWORD,
+            virtualhost=config.RABBITMQ.VHOST,
+        )
+
+    connection_pool = Pool(get_connection, max_size=2)
+
+    async def get_channel() -> aio_pika.Channel:
+        async with connection_pool.acquire() as connection:
+            return await connection.channel()
+
+    channel_pool = Pool(get_channel, max_size=10)
 
     getattr(app, "state").task_result = dict()
 
     getattr(app, "state").isa = ImgSearchAdapter(
-        rmq,
+        channel_pool,
         config
     )
 
+    async def consume() -> None:
+        async with channel_pool.acquire() as channel:
+            queue = await channel.declare_queue(
+                config.SEARCHER_TASKS_RECEIVER_ID,
+                durable=True,
+                exclusive=False,
+            )
+            async with queue.iterator() as queue_iter:
+                async for message in queue_iter:
+                    await message.ack()
+                    await update_task_result(message, app)
 
-    channel = await rmq.channel()
-    queue = await channel.declare_queue(
-        config.SEARCHER_TASKS_RECEIVER_ID,
-        durable=True,
-        exclusive=False,
-    )
-
-    await queue.consume(lambda message: update_task_result(message, app))
-    try:
-        # Wait until terminate
-        await asyncio.Future()
-    finally:
-        await rmq.close()
+    async with connection_pool, channel_pool:
+        await consume()
 
 
 async def init_s3_storage(app: FastAPI, config: Config):

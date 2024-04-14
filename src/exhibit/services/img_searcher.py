@@ -98,8 +98,8 @@ class ImgSearcherApplicationService:
 
 
 class ImgSearchAdapter:
-    def __init__(self, rmq: aio_pika.abc.AbstractRobustConnection, config: ImgSearcherConfig):
-        self._rmq = rmq
+    def __init__(self, channel_pool: aio_pika.pool.Pool, config: ImgSearcherConfig):
+        self._channel_pool = channel_pool
         self._config = config
 
     async def send_data(
@@ -107,26 +107,24 @@ class ImgSearchAdapter:
             body: str
 
     ):
-        channel = await self._rmq.channel()
+        async with self._channel_pool.acquire() as channel:
+            await channel.declare_queue(
+                self._config.SEARCHER_TASKS_SENDER_ID,
+                durable=True,
+                exclusive=False,
+                auto_delete=False
+            )
 
-        await channel.declare_queue(
-            self._config.SEARCHER_TASKS_SENDER_ID,
-            durable=True,
-            exclusive=False,
-            auto_delete=False
-        )
-
-        await channel.default_exchange.publish(
-            aio_pika.Message(body=body.encode()),
-            routing_key=self._config.SEARCHER_TASKS_SENDER_ID
-        )
+            await channel.default_exchange.publish(
+                aio_pika.Message(body=body.encode()),
+                routing_key=self._config.SEARCHER_TASKS_SENDER_ID
+            )
 
 
 async def update_task_result(
         message: aio_pika.IncomingMessage,
         app
 ):
-    await message.ack()
 
     message_body = message.body.decode()
     logging.debug(f"[RMQ ImgSearch] Received message")

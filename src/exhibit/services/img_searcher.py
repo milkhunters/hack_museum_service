@@ -75,13 +75,14 @@ class ImgSearcherApplicationService:
 
         self._task_result[str(file_id)] = dict(
             status="in_process",
+            classif="",
             result=[]
         )
 
     async def get_task_result(
             self,
             file_id: uuid.UUID
-    ) -> list[ExhibitSmall]:
+    ) -> schemas.ImgResult:
 
         data = self._task_result.get(str(file_id))
         if data is None:
@@ -91,10 +92,16 @@ class ImgSearcherApplicationService:
             raise exceptions.APIError("Задача находится в процессе выполнения", status_code=202)
 
         if not data["result"]:
-            return []
+            return schemas.ImgResult(
+                classif=data["classif"],
+                result=[]
+            )
 
         result = await self._repo.get_exhibits_by_ids(data["result"])
-        return [ExhibitSmall.model_validate(exhibit) for exhibit in result]
+        return schemas.ImgResult(
+            classif=data["classif"],
+            result=[ExhibitSmall.model_validate(exhibit) for exhibit in result]
+        )
 
 
 class ImgSearchAdapter:
@@ -125,7 +132,6 @@ async def update_task_result(
         message: aio_pika.IncomingMessage,
         app
 ):
-
     message_body = message.body.decode()
     logging.debug(f"[RMQ ImgSearch] Received message")
 
@@ -141,9 +147,10 @@ async def update_task_result(
         logging.warning("[RMQ ImgSearch] Result list not found in result")
         return
 
+    classif = result.get("classif") or " "
+
     app.state.task_result[file_id] = dict(
         status="done",
+        classif=classif,
         result=[uuid.UUID(_) for _ in content]
     )
-
-

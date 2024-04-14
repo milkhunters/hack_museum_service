@@ -16,6 +16,8 @@ from .exhibit import ExhibitFileItem
 from .exhibit import FileCreate
 from .exhibit import FileUpload
 
+from .img_result import ImgResult
+
 from .tag import Tag
 
 from .comment import Comment

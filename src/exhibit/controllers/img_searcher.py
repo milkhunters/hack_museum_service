@@ -8,6 +8,7 @@ from exhibit.models import schemas
 from exhibit.services import ServiceFactory
 from exhibit.views import ExhibitsResponse
 from exhibit.views.exhibit import FileUploadResponse
+from exhibit.views.img_result import ImgSearchResultResponse
 
 router = APIRouter()
 
@@ -42,7 +43,7 @@ async def make_search_task(
     return await services.img_searcher.make_search_task(file_id)
 
 
-@router.get("/task/{file_id}", response_model=ExhibitsResponse, status_code=http_status.HTTP_201_CREATED)
+@router.get("/task/{file_id}", response_model=ImgSearchResultResponse, status_code=http_status.HTTP_201_CREATED)
 async def get_task_result(
         file_id: uuid.UUID,
         services: ServiceFactory = Depends(get_services)
@@ -51,4 +52,4 @@ async def get_task_result(
     Получить результат поиска по изображению
 
     """
-    return ExhibitsResponse(content=await services.img_searcher.get_task_result(file_id))
+    return ImgSearchResultResponse(content=await services.img_searcher.get_task_result(file_id))
